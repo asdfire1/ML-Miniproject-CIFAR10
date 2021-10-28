@@ -14,9 +14,42 @@ def unpickle(file):
 trainfile = "data/data_batch_1"
 traindict=unpickle(trainfile)
 trainlabelsl=traindict[b'labels']
-trainlabels=np.array(trainlabelsl)
-traindata=traindict[b'data']
-traindata = traindata/255
+trainlabels1=np.array(trainlabelsl)
+traindata1=traindict[b'data']
+traindata1 = traindata1/255
+
+trainfile2 = "data/data_batch_2"
+traindict2=unpickle(trainfile2)
+trainlabelsl2=traindict[b'labels']
+trainlabels2=np.array(trainlabelsl2)
+traindata2=traindict2[b'data']
+traindata2 = traindata2/255
+'''
+trainfile3 = "data/data_batch_3"
+traindict3=unpickle(trainfile3)
+trainlabelsl3=traindict[b'labels']
+trainlabels3=np.array(trainlabelsl3)
+traindata3=traindict3[b'data']
+traindata3 = traindata3/255
+
+trainfile4 = "data/data_batch_4"
+traindict4=unpickle(trainfile4)
+trainlabelsl4=traindict[b'labels']
+trainlabels4=np.array(trainlabelsl4)
+traindata4=traindict4[b'data']
+traindata4 = traindata4/255
+
+trainfile5 = "data/data_batch_5"
+traindict5=unpickle(trainfile5)
+trainlabelsl3=traindict[b'labels']
+trainlabels3=np.array(trainlabelsl3)
+traindata3=traindict3[b'data']
+traindata3 = traindata3/255
+'''
+
+traindata=np.concatenate((traindata1, traindata2))
+trainlabels=np.concatenate((trainlabels1,trainlabels2))
+
 
 testfile = "data/test_batch"
 testdict=unpickle(testfile)
@@ -46,7 +79,7 @@ def est_params(trn_set, trn_targets):
     '''
     #Get the data dimension
     _, d = trn_set.shape 
-    print(f'Trn shape: {trn_set.shape}')
+    #print(f'Trn shape: {trn_set.shape}')
     #Zero arrays for storing means and covs.
     means = np.zeros((10,d))
     covs = np.zeros((10, d, d))
@@ -54,9 +87,9 @@ def est_params(trn_set, trn_targets):
     #For each class compute mean and cov.
     for i in range(10):
         indx = trn_targets == i
-        print(f'index: {indx}')
+        #print(f'index: {indx}')
         means[i] = np.mean(trn_set[indx], axis = 0)
-        print(f'Means of: {i} :{means[i]}')
+        #print(f'Means of: {i} :{means[i]}')
         covs[i] = np.cov(trn_set[indx].T)
     return means, covs
 
@@ -100,7 +133,7 @@ for b in range (10):
 n_components = 100
 
 #Start of stolen code again 
-print(traindata)
+#print(traindata)
 #PCA
 pca = PCA(n_components = n_components)
 trn_pca_set = pca.fit_transform(traindata)
