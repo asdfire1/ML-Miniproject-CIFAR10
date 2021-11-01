@@ -1,8 +1,9 @@
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.stats import multivariate_normal as norm
+import matplotlib.pyplot as plt
+from sklearn import svm
+import time
 
 def unpickle(file):
     import pickle
@@ -26,17 +27,14 @@ testdata=testdict[b'data']
 testdata = testdata/255
 
 #STOLEN FROM EXERCISES
-def est_params(trn_set, trn_targets):
-    '''
-    Function for estimating the parameters for multiple gaussian distributions.
+#A list of the class names.
+classes = np.arange(10)
 
-    Parameters
-    ----------
-    trn_set : numpy.ndarray
-        Training set.
-    trn_targets : numpy.ndarray
-        Training targets / class labels.
+#%%Support Vector Machine (SVM)
+#Maximum number of iterations. Even if the SVM doesn't converge it will stop anyway.
+n_iter = 3000
 
+<<<<<<< Updated upstream
     Returns
     -------
     means : numpy.ndarray
@@ -59,42 +57,21 @@ def est_params(trn_set, trn_targets):
         print(f'Means of: {i} :{means[i]}')
         covs[i] = np.cov(trn_set[indx].T)
     return means, covs
+=======
+#Create SVM for classification (SVC). The standard kernel in the scikit-learn
+#is the RBF (Gaussian Kernel).
+svc = svm.SVC(max_iter = n_iter)
+>>>>>>> Stashed changes
 
-def predict(tst_set, means, covs):
-    '''
-    Function for making the class prediction based on maximum likelihood.
+start_time = time.time()    #Time in seconds when starting the training/fiting.
+svc.fit(traindata, trainlabels)   #Train/fit the SVC
+fit_time = time.time() - start_time     #Compute the training/fiting time in seconds
+print("Training Time: {:2.0f}m{:2.0f}s".format(fit_time//60, fit_time%60))
 
-    Parameters
-    ----------
-    tst_set : numpy.ndarray
-        Test set.
-    means : numpy.ndarray
-        Mean vectors for each class.
-    covs : numpy.ndarray
-        Covariance matrices for each class.
-        
-    Returns
-    -------
-    preds : numpy.ndarray
-        Class predictions.
-    '''
-    probs = []
-    for i in range(len(covs)):
-        probs.append(norm.pdf(tst_set, means[i], covs[i]))
-    probs = np.c_[tuple(probs)]
-    preds = np.argmax(probs, axis = 1)
-    return preds
-#END OF STOLEN CODE
-'''
-#splitter
-trn = [None] * 10
-for b in range (10):
-    trn[b]=np.array([np.zeros(3072)])
-    for x in range(len(traindict[b'labels'])):
-        if trainlabels[x]==b:
-            trn[b]=np.concatenate((trn[b], np.array([traindata[x]])), axis=0)
-    trn[b]=np.delete(trn[b], 0, 0)
+#Predictions
+pred = svc.predict(testdata)
 
+<<<<<<< Updated upstream
 #print(trn[0])
 '''
 n_components = 100
@@ -130,5 +107,25 @@ pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
 print("PCA Accuracy: {:.2f}".format(pca_acc))
 #print("LDA Accuracy: {:.2f}".format(lda_acc))
 
+=======
+end_time = time.time() - start_time #Compute the total train and predict time in seconds
+print("Total Running Time: {:2.0f}m{:2.0f}s".format(end_time//60, end_time%60))
+
+#Compute accuracy
+acc = np.sum(pred == testlabels)/len(testlabels) * 100
+print("SVM Accuracy: {:.2f}".format(acc))
+
+#%%Confusion matrix
+#Compute the confusion matrix
+cm = confusion_matrix(testlabels, pred, normalize = "true")
+
+#Prepare for plotting
+cm = ConfusionMatrixDisplay(cm, classes)
+
+#Plot Confusion matrices
+fig, ax = plt.subplots()
+cm.plot(cmap = "Blues", ax = ax)
+ax.set_title("Confusion Matrix SVM")
+>>>>>>> Stashed changes
 
                      
