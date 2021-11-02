@@ -3,13 +3,14 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from scipy.stats import multivariate_normal as norm
+import time
 #Function for unpacking the data
 def unpickle(file):
     import pickle
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
-
+start_time = time.time()
 #Unpacking the data files, normalizing them and saving them as variables
 trainfile = "data/data_batch_1" #Path to training data file
 traindict=unpickle(trainfile)
@@ -108,6 +109,8 @@ lda_pred = predict(tst_lda_set, lda_means, lda_covs)
 #Computing the accuracy of predictions
 pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
 lda_acc = np.sum(lda_pred == testlabels)/len(testlabels) * 100
+end_time = time.time() - start_time     #Compute the training/fiting time in seconds
+print("Running time: {:2.0f}m{:2.0f}s".format(end_time//60, end_time%60))
 print("PCA Accuracy: {:.2f}".format(pca_acc))
 print("LDA Accuracy: {:.2f}".format(lda_acc))
 
