@@ -1,31 +1,31 @@
+#Libraries, imports
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.stats import multivariate_normal as norm
-
+#Function for unpacking the data
 def unpickle(file):
     import pickle
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
-
-trainfile = "data/data_batch_1"
+#Unpacking the data files, normalizing them and saving them as variables
+trainfile = "data/data_batch_1" #Path to training data file
 traindict=unpickle(trainfile)
 trainlabelsl=traindict[b'labels']
 trainlabels=np.array(trainlabelsl)
 traindata=traindict[b'data']
 traindata = traindata/255
 
-testfile = "data/test_batch"
+testfile = "data/test_batch" #Path to testing data file
 testdict=unpickle(testfile)
 testlabelsl=testdict[b'labels']
 testlabels=np.array(testlabelsl)
 testdata=testdict[b'data']
 testdata = testdata/255
 
-#STOLEN FROM EXERCISES
+#Functions from the exercises
 def est_params(trn_set, trn_targets):
     '''
     Function for estimating the parameters for multiple gaussian distributions.
@@ -46,7 +46,6 @@ def est_params(trn_set, trn_targets):
     '''
     #Get the data dimension
     _, d = trn_set.shape 
-    print(f'Trn shape: {trn_set.shape}')
     #Zero arrays for storing means and covs.
     means = np.zeros((10,d))
     covs = np.zeros((10, d, d))
@@ -54,9 +53,7 @@ def est_params(trn_set, trn_targets):
     #For each class compute mean and cov.
     for i in range(10):
         indx = trn_targets == i
-        print(f'index: {indx}')
         means[i] = np.mean(trn_set[indx], axis = 0)
-        print(f'Means of: {i} :{means[i]}')
         covs[i] = np.cov(trn_set[indx].T)
     return means, covs
 
@@ -84,51 +81,36 @@ def predict(tst_set, means, covs):
     probs = np.c_[tuple(probs)]
     preds = np.argmax(probs, axis = 1)
     return preds
-#END OF STOLEN CODE
-'''
-#splitter
-trn = [None] * 10
-for b in range (10):
-    trn[b]=np.array([np.zeros(3072)])
-    for x in range(len(traindict[b'labels'])):
-        if trainlabels[x]==b:
-            trn[b]=np.concatenate((trn[b], np.array([traindata[x]])), axis=0)
-    trn[b]=np.delete(trn[b], 0, 0)
+#End of functions from exercises
 
-#print(trn[0])
-'''
-n_components = 100
+n_components = 9 #Number of components for PCA and LDA, 
+#The number has to be smaller than the number of classes if using LDA
 
-#Start of stolen code again 
-print(traindata)
-#PCA
+#Using the functions from exercises
+#Dimensionality reduction - PCA
 pca = PCA(n_components = n_components)
 trn_pca_set = pca.fit_transform(traindata)
 tst_pca_set = pca.transform(testdata)
-'''
-#LDA
+
+#Dimensionality reduction - LDA
 lda = LDA(n_components = n_components)
 trn_lda_set = lda.fit_transform(traindata, trainlabels)
 tst_lda_set = lda.transform(testdata)
-'''
-#Proportion of Variance
-pov_pca = np.sum(pca.explained_variance_ratio_)
-#pov_lda = np.sum(lda.explained_variance_ratio_)
 
-#%%Classification
-#Compute the parameters for each PCA and LDA reduced data.
+#Estimating the distribution parameters for PCA and LDA
 pca_means, pca_covs = est_params(trn_pca_set, trainlabels)
-#lda_means, lda_covs = est_params(trn_lda_set, trainlabels)
+lda_means, lda_covs = est_params(trn_lda_set, trainlabels)
 
-#Compute predictions
+#Predictions for both PCA and LDA
 pca_pred = predict(tst_pca_set, pca_means, pca_covs)
-#lda_pred = predict(tst_lda_set, lda_means, lda_covs)
+lda_pred = predict(tst_lda_set, lda_means, lda_covs)
 
-#Compute accuracy
+#Computing the accuracy of predictions
 pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
-#lda_acc = np.sum(lda_pred == testlabels)/len(testlabels) * 100
+lda_acc = np.sum(lda_pred == testlabels)/len(testlabels) * 100
 print("PCA Accuracy: {:.2f}".format(pca_acc))
-#print("LDA Accuracy: {:.2f}".format(lda_acc))
+print("LDA Accuracy: {:.2f}".format(lda_acc))
+
 
 
                      
