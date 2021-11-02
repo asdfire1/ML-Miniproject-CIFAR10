@@ -1,7 +1,4 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from scipy.stats import multivariate_normal as norm
-import matplotlib.pyplot as plt
 from sklearn import svm
 import time
 
@@ -26,7 +23,7 @@ testlabels=np.array(testlabelsl)
 testdata=testdict[b'data']
 testdata = testdata/255
 
-#STOLEN FROM EXERCISES
+#Code from exercises
 #A list of the class names.
 classes = np.arange(10)
 
@@ -52,16 +49,5 @@ print("Total Running Time: {:2.0f}m{:2.0f}s".format(end_time//60, end_time%60))
 acc = np.sum(pred == testlabels)/len(testlabels) * 100
 print("SVM Accuracy: {:.2f}".format(acc))
 
-#%%Confusion matrix
-#Compute the confusion matrix
-cm = confusion_matrix(testlabels, pred, normalize = "true")
-
-#Prepare for plotting
-cm = ConfusionMatrixDisplay(cm, classes)
-
-#Plot Confusion matrices
-fig, ax = plt.subplots()
-cm.plot(cmap = "Blues", ax = ax)
-ax.set_title("Confusion Matrix SVM")
 
                      
