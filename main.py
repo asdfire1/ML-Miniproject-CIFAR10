@@ -1,9 +1,16 @@
 #Libraries, imports
 import numpy as np
+<<<<<<< Updated upstream
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from scipy.stats import multivariate_normal as norm
 #Function for unpacking the data
+=======
+from sklearn import svm
+from sklearn.decomposition import PCA
+import time
+
+>>>>>>> Stashed changes
 def unpickle(file):
     import pickle
     with open(file, 'rb') as fo:
@@ -25,6 +32,7 @@ testlabels=np.array(testlabelsl)
 testdata=testdict[b'data']
 testdata = testdata/255
 
+<<<<<<< Updated upstream
 #Functions from the exercises
 def est_params(trn_set, trn_targets):
     '''
@@ -91,12 +99,22 @@ n_components = 9 #Number of components for PCA and LDA,
 pca = PCA(n_components = n_components)
 trn_pca_set = pca.fit_transform(traindata)
 tst_pca_set = pca.transform(testdata)
+=======
+#Code from exercises
+n_components=190
+pca = PCA(n_components = n_components)
+trn_pca_set = pca.fit_transform(traindata)
+tst_pca_set = pca.transform(testdata)
+#A list of the class names.
+classes = np.arange(10)
+>>>>>>> Stashed changes
 
 #Dimensionality reduction - LDA
 lda = LDA(n_components = n_components)
 trn_lda_set = lda.fit_transform(traindata, trainlabels)
 tst_lda_set = lda.transform(testdata)
 
+<<<<<<< Updated upstream
 #Estimating the distribution parameters for PCA and LDA
 pca_means, pca_covs = est_params(trn_pca_set, trainlabels)
 lda_means, lda_covs = est_params(trn_lda_set, trainlabels)
@@ -104,6 +122,15 @@ lda_means, lda_covs = est_params(trn_lda_set, trainlabels)
 #Predictions for both PCA and LDA
 pca_pred = predict(tst_pca_set, pca_means, pca_covs)
 lda_pred = predict(tst_lda_set, lda_means, lda_covs)
+=======
+start_time = time.time()    #Time in seconds when starting the training/fiting.
+svc.fit(trn_pca_set, trainlabels)   #Train/fit the SVC
+fit_time = time.time() - start_time     #Compute the training/fiting time in seconds
+print("Training Time: {:2.0f}m{:2.0f}s".format(fit_time//60, fit_time%60))
+
+#Predictions
+pred = svc.predict(tst_pca_set)
+>>>>>>> Stashed changes
 
 #Computing the accuracy of predictions
 pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
