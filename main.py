@@ -1,8 +1,8 @@
 #Libraries, imports
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from scipy.stats import multivariate_normal as norm
+from tensorflow import keras
+import pandas as pd
+import matplotlib.pyplot as plt
 import time
 #Function for unpacking the data
 def unpickle(file):
@@ -10,109 +10,138 @@ def unpickle(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
+
+
 start_time = time.time()
-#Unpacking the data files, normalizing them and saving them as variables
-trainfile = "data/data_batch_1" #Path to training data file
+#Unpacking the data files and saving them as variables
+
+
+trainfile = "data/data_batch_1"
 traindict=unpickle(trainfile)
 trainlabelsl=traindict[b'labels']
-trainlabels=np.array(trainlabelsl)
-traindata=traindict[b'data']
-traindata = traindata/255
+trainlabels1=np.array(trainlabelsl)
+traindata1=traindict[b'data']
+del traindict
+del trainlabelsl
+
+
+trainfile2 = "data/data_batch_2"
+traindict2=unpickle(trainfile2)
+trainlabelsl2=traindict2[b'labels']
+trainlabels2=np.array(trainlabelsl2)
+traindata2=traindict2[b'data']
+del traindict2
+del trainlabelsl2
+
+
+trainfile3 = "data/data_batch_3"
+traindict3=unpickle(trainfile3)
+trainlabelsl3=traindict3[b'labels']
+trainlabels3=np.array(trainlabelsl3)
+traindata3=traindict3[b'data']
+del traindict3
+del trainlabelsl3
+
+
+trainfile4 = "data/data_batch_4"
+traindict4=unpickle(trainfile4)
+trainlabelsl4=traindict4[b'labels']
+trainlabels4=np.array(trainlabelsl4)
+traindata4=traindict4[b'data']
+del traindict4
+del trainlabelsl4
+
+
+trainfile5 = "data/data_batch_5"
+traindict5=unpickle(trainfile5)
+trainlabelsl5=traindict5[b'labels']
+trainlabels5=np.array(trainlabelsl5)
+traindata5=traindict5[b'data']
+del traindict5
+del trainlabelsl5
+
+
+traindata_all=np.concatenate((traindata1, traindata2, traindata3, traindata4, traindata5))
+del traindata1, traindata2, traindata3, traindata4, traindata5
+trainlabels_all=np.concatenate((trainlabels1,trainlabels2, trainlabels3, trainlabels4, trainlabels5))
+del trainlabels1,trainlabels2, trainlabels3, trainlabels4, trainlabels5
+traindata1r=np.reshape(traindata_all, (50000,32,32,3), order='F') #Reshaping the data for CNN usage
+del traindata_all
 
 testfile = "data/test_batch" #Path to testing data file
 testdict=unpickle(testfile)
 testlabelsl=testdict[b'labels']
 testlabels=np.array(testlabelsl)
 testdata=testdict[b'data']
-testdata = testdata/255
+del testdict
+del testlabelsl
 
-#Functions from the exercises
-def est_params(trn_set, trn_targets):
-    '''
-    Function for estimating the parameters for multiple gaussian distributions.
+testdatar=np.reshape(testdata, (10000,32,32,3), order='F') #Reshaping the data for CNN usage
+del testdata
 
-    Parameters
-    ----------
-    trn_set : numpy.ndarray
-        Training set.
-    trn_targets : numpy.ndarray
-        Training targets / class labels.
 
-    Returns
-    -------
-    means : numpy.ndarray
-        Mean vectors for each class.
-    covs : numpy.ndarray
-        Covariance matrices for each class.
-    '''
-    #Get the data dimension
-    _, d = trn_set.shape 
-    #Zero arrays for storing means and covs.
-    means = np.zeros((10,d))
-    covs = np.zeros((10, d, d))
-    
-    #For each class compute mean and cov.
-    for i in range(10):
-        indx = trn_targets == i
-        means[i] = np.mean(trn_set[indx], axis = 0)
-        covs[i] = np.cov(trn_set[indx].T)
-    return means, covs
+#adapting names to match the code
+y_train_full=trainlabels_all
+X_train_full=traindata1r
+X_test=testdatar
+y_test=testlabels
+#deleting  old variables
+del trainlabels_all
+del traindata1r
+del testdatar
+del testlabels
 
-def predict(tst_set, means, covs):
-    '''
-    Function for making the class prediction based on maximum likelihood.
+#sample code
+X_valid, X_train = X_train_full[:5000], X_train_full[5000:]
+y_valid, y_train = y_train_full[:5000], y_train_full[5000:]
 
-    Parameters
-    ----------
-    tst_set : numpy.ndarray
-        Test set.
-    means : numpy.ndarray
-        Mean vectors for each class.
-    covs : numpy.ndarray
-        Covariance matrices for each class.
-        
-    Returns
-    -------
-    preds : numpy.ndarray
-        Class predictions.
-    '''
-    probs = []
-    for i in range(len(covs)):
-        probs.append(norm.pdf(tst_set, means[i], covs[i]))
-    probs = np.c_[tuple(probs)]
-    preds = np.argmax(probs, axis = 1)
-    return preds
-#End of functions from exercises
+#normalizing data
 
-n_components = 9 #Number of components for PCA and LDA, 
-#The number has to be smaller than the number of classes if using LDA
+X_mean = X_train.mean(axis=0, keepdims=True)
+X_std = X_train.std(axis=0, keepdims=True) + 1e-7
+X_train = (X_train - X_mean) / X_std
+X_valid = (X_valid - X_mean) / X_std
+X_test = (X_test - X_mean) / X_std
 
-#Using the functions from exercises
-#Dimensionality reduction - PCA
-pca = PCA(n_components = n_components)
-trn_pca_set = pca.fit_transform(traindata)
-tst_pca_set = pca.transform(testdata)
 
-#Dimensionality reduction - LDA
-lda = LDA(n_components = n_components)
-trn_lda_set = lda.fit_transform(traindata, trainlabels)
-tst_lda_set = lda.transform(testdata)
+#neural network structure
+model = keras.models.Sequential([keras.layers.InputLayer(input_shape=(32, 32, 3)),
+                                 keras.layers.Conv2D(64, 8, activation="relu", padding= "same", input_shape=[32, 32, 3]),
+                                 keras.layers.MaxPooling2D(2),
+                                 keras.layers.Conv2D(128, 3, activation="relu", padding="same"),
+                                 keras.layers.Conv2D(128, 3, activation="relu", padding="same"),
+                                 keras.layers.MaxPooling2D(2),
+                                 keras.layers.Conv2D(256, 3, activation="relu", padding="same"),
+                                 keras.layers.Conv2D(256, 3, activation="relu", padding="same"),
+                                 keras.layers.MaxPooling2D(2),
+                                 keras.layers.Flatten(),
+                                 keras.layers.Dense(128, activation="relu"),
+                                 keras.layers.Dropout(0.5),
+                                 keras.layers.Dense(64, activation="relu"),
+                                 keras.layers.Dropout(0.5),
+                                 keras.layers.Dense(10, activation="softmax")
+                                 ])
+model.summary()  #Show the structure of the neural network
+model.compile(loss="sparse_categorical_crossentropy", optimizer="nadam", metrics=["accuracy"])
 
-#Estimating the distribution parameters for PCA and LDA
-pca_means, pca_covs = est_params(trn_pca_set, trainlabels)
-lda_means, lda_covs = est_params(trn_lda_set, trainlabels)
+#training the neural network
+history = model.fit(X_train, 
+                    y_train, 
+                    epochs = 30, 
+                    validation_data = (X_valid, y_valid))
+#plots
+pd.DataFrame(history.history).plot(figsize = (16, 10)) 
+plt.grid(True) 
+plt.gca().set_ylim(0, 1) 
+plt.show() 
 
-#Predictions for both PCA and LDA
-pca_pred = predict(tst_pca_set, pca_means, pca_covs)
-lda_pred = predict(tst_lda_set, lda_means, lda_covs)
 
 #Computing the accuracy of predictions
-pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
-lda_acc = np.sum(lda_pred == testlabels)/len(testlabels) * 100
+
+model.evaluate(X_test,y_test)
 end_time = time.time() - start_time     #Compute the training/fiting time in seconds
 print("Running time: {:2.0f}m{:2.0f}s".format(end_time//60, end_time%60))
-print("PCA Accuracy: {:.2f}".format(pca_acc))
-print("LDA Accuracy: {:.2f}".format(lda_acc))
+
 
 
 
