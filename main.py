@@ -1,53 +1,62 @@
 import numpy as np
 from sklearn.decomposition import PCA
 from scipy.stats import multivariate_normal as norm
-
+import time
 def unpickle(file):
     import pickle
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
-
+start_time = time.time()
 trainfile = "data/data_batch_1"
 traindict=unpickle(trainfile)
 trainlabelsl=traindict[b'labels']
 trainlabels1=np.array(trainlabelsl)
 traindata1=traindict[b'data']
+del traindict
+del trainlabelsl
 traindata1 = traindata1/255
 
 trainfile2 = "data/data_batch_2"
 traindict2=unpickle(trainfile2)
-trainlabelsl2=traindict[b'labels']
+trainlabelsl2=traindict2[b'labels']
 trainlabels2=np.array(trainlabelsl2)
 traindata2=traindict2[b'data']
+del traindict2
+del trainlabelsl2
 traindata2 = traindata2/255
 
 trainfile3 = "data/data_batch_3"
 traindict3=unpickle(trainfile3)
-trainlabelsl3=traindict[b'labels']
+trainlabelsl3=traindict3[b'labels']
 trainlabels3=np.array(trainlabelsl3)
 traindata3=traindict3[b'data']
+del traindict3
+del trainlabelsl3
 traindata3 = traindata3/255
 
 trainfile4 = "data/data_batch_4"
 traindict4=unpickle(trainfile4)
-trainlabelsl4=traindict[b'labels']
+trainlabelsl4=traindict4[b'labels']
 trainlabels4=np.array(trainlabelsl4)
 traindata4=traindict4[b'data']
+del traindict4
+del trainlabelsl4
 traindata4 = traindata4/255
 
 trainfile5 = "data/data_batch_5"
 traindict5=unpickle(trainfile5)
-trainlabelsl5=traindict[b'labels']
+trainlabelsl5=traindict5[b'labels']
 trainlabels5=np.array(trainlabelsl5)
 traindata5=traindict5[b'data']
-traindata5 = traindata3/255
+del traindict5
+del trainlabelsl5
+traindata5 = traindata5/255
 
-#traindata=traindata1
-#trainlabels=trainlabels1
 traindata=np.concatenate((traindata1, traindata2, traindata3, traindata4, traindata5))
 trainlabels=np.concatenate((trainlabels1,trainlabels2, trainlabels3, trainlabels4, trainlabels5))
+
 
 
 testfile = "data/test_batch"
@@ -135,6 +144,8 @@ pca_pred = predict(tst_pca_set, pca_means, pca_covs)
 
 #Calculating accuraccy
 pca_acc = np.sum(pca_pred == testlabels)/len(testlabels) * 100
+end_time = time.time() - start_time     #Compute the training/fiting time in seconds
+print("Running time: {:2.0f}m{:2.0f}s".format(end_time//60, end_time%60))
 print("PCA Accuracy: {:.2f}".format(pca_acc))
 
 
